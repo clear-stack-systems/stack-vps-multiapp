@@ -1,0 +1,74 @@
+name: server-stack
+
+networks:
+  stack:
+    name: ${STACK_NETWORK}
+    driver: bridge
+
+volumes:
+  mysql_data:
+  postgres_data:
+  n8n_data:
+
+services:
+  app:
+    image: ${PHP_IMAGE}
+    container_name: ${APP_NAME}_php
+    working_dir: /var/www/app
+    environment:
+      TZ: ${TZ}
+    networks: [stack]
+
+  node_builder:
+    image: ${NODE_IMAGE}
+    container_name: ${APP_NAME}_node_builder
+    working_dir: /var/www/app
+    environment:
+      TZ: ${TZ}
+    networks: [stack]
+    # Intentionally no command: use `docker compose run --rm node_builder ...` during deploy.
+
+  mysql:
+    image: ${MYSQL_IMAGE}
+    container_name: mysql
+    environment:
+      TZ: ${TZ}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks: [stack]
+
+  postgres:
+    image: ${POSTGRES_IMAGE}
+    container_name: postgres
+    environment:
+      TZ: ${TZ}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks: [stack]
+
+  n8n:
+    image: ${N8N_IMAGE}
+    container_name: n8n
+    environment:
+      TZ: ${TZ}
+      N8N_BASIC_AUTH_ACTIVE: ${N8N_BASIC_AUTH_ACTIVE}
+      N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      N8N_HOST: ${N8N_HOST}
+      N8N_PROTOCOL: ${N8N_PROTOCOL}
+      N8N_PORT: ${N8N_PORT}
+      # Webhook URL helps behind reverse proxy
+      WEBHOOK_URL: ${N8N_PROTOCOL}://${N8N_HOST}/
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks: [stack]
+    expose:
+      - "5678"
