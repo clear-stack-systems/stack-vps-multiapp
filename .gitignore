@@ -1,0 +1,40 @@
+# --- Environment files ---
+.env
+.env.*.local
+.env.local
+.env.dev
+.env.prod
+
+# --- Secrets / certificates ---
+/srv/
+/letsencrypt/
+**/certs/
+**/*.key
+**/*.pem
+
+# --- Docker ---
+docker-compose.override.yml
+
+# --- Logs ---
+logs/
+*.log
+
+# --- Temporary / runtime ---
+tmp/
+.cache/
+*.tmp
+
+# --- Node (if any local tooling sneaks in) ---
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# --- PHP (defensive; stack repo shouldn't have vendor anyway) ---
+vendor/
+
+# --- IDE / editor (project-specific only) ---
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+.idea/
