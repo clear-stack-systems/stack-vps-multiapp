@@ -1,56 +1,61 @@
-# Server Stack (Docker Compose)
+# Docker Compose Server Stack
 
 A reproducible multi-app server stack for:
-- Nginx reverse proxy + ACME HTTP-01 + Certbot
-- Laravel (PHP-FPM)
-- Separate Node builder container (Vite build)
+- Nginx reverse proxy (HTTP/HTTPS)
+- ACME HTTP-01 + Certbot
+- Laravel (PHP-FPM) for dev and prod (separate runtimes)
+- Separate Node builder containers (Vite build) for dev/prod
 - MySQL + Postgres
 - n8n (optional, included)
 
 ## Goals
-- Reproducible on a new server: clone → fill `.env` → bootstrap → up.
+- Reproducible on a new server: clone → run installer → up.
 - Versioned images (no `latest`).
 - Same service set for local/dev/prod; differences via `.env` + compose overrides.
 - App code lives in separate repos; this repo only mounts app folders from the host.
 
-## Non-goals
-- This repo does not contain application source code.
-- This repo does not implement a full CI/CD system (v1 focuses on reliability and simplicity).
+## Requirements
+- Ubuntu 24.04
+- DNS A records pointing to this server (prod/dev, optional n8n)
+- Public app repo (recommended) to avoid SSH keys
 
-## Design decisions (ours)
-- Separate Node builder service (no Node inside PHP runtime).
-- Explicit image tags; consider digest pinning if you need immutability.
-- Server filesystem convention under `/srv`.
+## Quick start (minimal interaction)
 
-## Inspired by common patterns
-- "Base compose + environment overrides" layout.
-- Nginx + Certbot + ACME well-known mount.
-- Idempotent bootstrap scripts.
-
-## Quick start (new server)
-1. Create folders:
-   - `/srv/docker/server-stack` (this repo)
-   - `/srv/apps/<app>/<env>/current` (your app repos)
-2. Copy `.env.example` → `.env.dev` or `.env.prod` and edit values.
-3. Bring up services:
-   ```bash
-   docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.server.yml up -d
-   ```
-4. First-time certificate issuance:
-   ```bash
-   ./scripts/first-time-certbot.sh
-   ```
-
-## Local run
+### 1) Clone the stack repo
 ```bash
-docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.local.yml up
+sudo mkdir -p /srv/docker
+sudo chown -R $USER:$USER /srv/docker
+cd /srv/docker
+git clone https://github.com/YOUR_ORG/YOUR_STACK_REPO.git
+cd YOUR_STACK_REPO
+chmod +x scripts/*.sh
 ```
 
-## Deploy (dev)
+### 2) Provide settings (one file, no wizard)
 ```bash
-./scripts/deploy-dev.sh exampleapp
+cp .env.example .env.dev
+nano .env.dev
+```
+
+### 3) Run installer (non-interactive)
+```bash
+./scripts/install.sh --env-file .env.dev
+```
+
+The installer will:
+- install packages + Docker + Compose plugin (if missing)
+- configure UFW (22/80/443)
+- create required folders under `/srv`
+- clone app repo to `/srv/apps/...` (if missing)
+- render Nginx vhosts from templates
+- bring the stack up
+- request certificates with Certbot and reload Nginx
+
+## Deploy
+```bash
+./scripts/deploy.sh dev
+./scripts/deploy.sh prod
 ```
 
 ## Notes
-- Replace placeholder domains in `nginx/sites/*.conf`.
-- Ensure `storage/` and `bootstrap/cache/` are writable by the PHP-FPM user inside the container.
+- `.env.*` files are not committed; only `.env.example` is tracked.

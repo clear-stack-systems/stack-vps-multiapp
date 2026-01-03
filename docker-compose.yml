@@ -11,22 +11,37 @@ volumes:
   n8n_data:
 
 services:
-  app:
+  app_dev:
     image: ${PHP_IMAGE}
-    container_name: ${APP_NAME}_php
+    container_name: ${APP_NAME}_php_dev
     working_dir: /var/www/app
     environment:
       TZ: ${TZ}
     networks: [stack]
 
-  node_builder:
-    image: ${NODE_IMAGE}
-    container_name: ${APP_NAME}_node_builder
+  app_prod:
+    image: ${PHP_IMAGE}
+    container_name: ${APP_NAME}_php_prod
     working_dir: /var/www/app
     environment:
       TZ: ${TZ}
     networks: [stack]
-    # Intentionally no command: use `docker compose run --rm node_builder ...` during deploy.
+
+  node_builder_dev:
+    image: ${NODE_IMAGE}
+    container_name: ${APP_NAME}_node_builder_dev
+    working_dir: /var/www/app
+    environment:
+      TZ: ${TZ}
+    networks: [stack]
+
+  node_builder_prod:
+    image: ${NODE_IMAGE}
+    container_name: ${APP_NAME}_node_builder_prod
+    working_dir: /var/www/app
+    environment:
+      TZ: ${TZ}
+    networks: [stack]
 
   mysql:
     image: ${MYSQL_IMAGE}
@@ -65,7 +80,6 @@ services:
       N8N_HOST: ${N8N_HOST}
       N8N_PROTOCOL: ${N8N_PROTOCOL}
       N8N_PORT: ${N8N_PORT}
-      # Webhook URL helps behind reverse proxy
       WEBHOOK_URL: ${N8N_PROTOCOL}://${N8N_HOST}/
     volumes:
       - n8n_data:/home/node/.n8n

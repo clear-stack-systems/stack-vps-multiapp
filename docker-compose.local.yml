@@ -1,20 +1,19 @@
 services:
-  app:
+  app_dev:
     volumes:
       - ${APP_PATH_DEV}:/var/www/app:cached
     environment:
       APP_ENV: local
 
-  node_builder:
+  node_builder_dev:
     volumes:
       - ${APP_PATH_DEV}:/var/www/app:cached
 
-  # Local: you can skip certbot and use http only.
   nginx:
     image: ${NGINX_IMAGE}
     container_name: nginx_local
     depends_on:
-      - app
+      - app_dev
     ports:
       - "8080:80"
     volumes:

@@ -1,19 +1,26 @@
 services:
-  app:
-    # Server mounts (prod + dev apps are separate containers in v1)
-    # If you prefer a single runtime container, you can mount only one and use env switching.
+  app_dev:
     volumes:
       - ${APP_PATH_DEV}:/var/www/app:delegated
 
-  node_builder:
+  app_prod:
+    volumes:
+      - ${APP_PATH_PROD}:/var/www/app:delegated
+
+  node_builder_dev:
     volumes:
       - ${APP_PATH_DEV}:/var/www/app:delegated
+
+  node_builder_prod:
+    volumes:
+      - ${APP_PATH_PROD}:/var/www/app:delegated
 
   nginx:
     image: ${NGINX_IMAGE}
     container_name: nginx
     depends_on:
-      - app
+      - app_dev
+      - app_prod
       - n8n
     ports:
       - "80:80"
