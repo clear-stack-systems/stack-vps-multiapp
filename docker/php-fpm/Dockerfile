@@ -18,5 +18,6 @@ RUN set -eux; \
   docker-php-ext-install -j"$(nproc)" \
     gd \
     intl \
+    pdo_mysql \
     zip; \
   apk del .build-deps
