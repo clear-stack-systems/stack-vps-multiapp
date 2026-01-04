@@ -15,7 +15,16 @@ services:
     image: ${PHP_IMAGE}
     container_name: ${APP_NAME}_php_dev
     working_dir: /var/www/app
-    command: ["php-fpm", "-F"]
+    command:
+      - sh
+      - -lc
+      - >
+          if command -v php-fpm8.3 >/dev/null 2>&1; then exec php-fpm8.3 -F;
+          elif command -v php-fpm8.2 >/dev/null 2>&1; then exec php-fpm8.2 -F;
+          elif command -v php-fpm8.1 >/dev/null 2>&1; then exec php-fpm8.1 -F;
+          elif command -v php-fpm8 >/dev/null 2>&1; then exec php-fpm8 -F;
+          elif command -v php-fpm >/dev/null 2>&1; then exec php-fpm -F;
+          else echo "php-fpm binary not found in container" >&2; exit 1; fi
     environment:
       TZ: ${TZ}
     networks: [stack]
@@ -24,7 +33,16 @@ services:
     image: ${PHP_IMAGE}
     container_name: ${APP_NAME}_php_prod
     working_dir: /var/www/app
-    command: ["php-fpm", "-F"]
+    command:
+      - sh
+      - -lc
+      - >
+          if command -v php-fpm8.3 >/dev/null 2>&1; then exec php-fpm8.3 -F;
+          elif command -v php-fpm8.2 >/dev/null 2>&1; then exec php-fpm8.2 -F;
+          elif command -v php-fpm8.1 >/dev/null 2>&1; then exec php-fpm8.1 -F;
+          elif command -v php-fpm8 >/dev/null 2>&1; then exec php-fpm8 -F;
+          elif command -v php-fpm >/dev/null 2>&1; then exec php-fpm -F;
+          else echo "php-fpm binary not found in container" >&2; exit 1; fi
     environment:
       TZ: ${TZ}
     networks: [stack]
