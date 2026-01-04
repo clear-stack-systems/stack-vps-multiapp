@@ -57,5 +57,10 @@ The installer will:
 ./scripts/deploy.sh prod
 ```
 
+## Optional: n8n
+- Set `DOMAIN_N8N` to a real DNS name to enable the n8n vhost and certificate.
+- Keep `N8N_BASIC_AUTH_*` enabled for initial access; installer generates secrets if left as `change-me`.
+- Set `N8N_HOST`/`N8N_PROTOCOL` to match the public n8n URL (used for webhooks).
+
 ## Notes
 - `.env.*` files are not committed; only `.env.example` is tracked.
