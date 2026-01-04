@@ -57,6 +57,11 @@ The installer will:
 ./scripts/deploy.sh prod
 ```
 
+## Health check
+```bash
+./scripts/health-check.sh --env-file .env.dev
+```
+
 ## PHP + Composer images
 - PHP-FPM is built locally from `docker/php-fpm/Dockerfile` (extensions: gd, intl, zip; base PHP 8.4.16).
 - Composer runs in a separate container (`composer:2.8.7`) for `deploy.sh`.
