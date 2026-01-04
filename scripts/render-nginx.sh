@@ -13,6 +13,7 @@ source "${ENV_FILE}"
 set +a
 
 mkdir -p nginx/sites
+find nginx/sites -maxdepth 1 -type f -name "*.conf" ! -name "00-acme.conf" -delete
 
 cert_exists() {
   local server_name="$1"

@@ -64,3 +64,4 @@ The installer will:
 
 ## Notes
 - `.env.*` files are not committed; only `.env.example` is tracked.
+- `nginx/sites` is generated at render time; example vhosts live as `*.conf.example`.
