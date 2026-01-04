@@ -71,7 +71,7 @@ source "${ENV_FILE}"
 set +a
 
 missing=()
-for k in DOMAIN_PROD DOMAIN_DEV APP_NAME APP_PATH_DEV APP_PATH_PROD APP_REPO_URL; do
+for k in DOMAIN_PROD DOMAIN_DEV APP_NAME APP_PATH_DEV APP_PATH_PROD APP_REPO_URL MYSQL_DATABASE_DEV MYSQL_DATABASE_PROD MYSQL_USER_DEV MYSQL_USER_PROD; do
   if [[ -z "${!k:-}" ]]; then missing+=("$k"); fi
 done
 if [[ ${#missing[@]} -gt 0 ]]; then
@@ -86,9 +86,13 @@ if [[ "${MYSQL_ROOT_PASSWORD:-}" == "change-me" || -z "${MYSQL_ROOT_PASSWORD:-}"
   MYSQL_ROOT_PASSWORD="$(gen_secret)"
   sed -i "s|^MYSQL_ROOT_PASSWORD=.*|MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}|" "${ENV_FILE}"
 fi
-if [[ "${MYSQL_PASSWORD:-}" == "change-me" || -z "${MYSQL_PASSWORD:-}" ]]; then
-  MYSQL_PASSWORD="$(gen_secret)"
-  sed -i "s|^MYSQL_PASSWORD=.*|MYSQL_PASSWORD=${MYSQL_PASSWORD}|" "${ENV_FILE}"
+if [[ "${MYSQL_PASSWORD_DEV:-}" == "change-me" || -z "${MYSQL_PASSWORD_DEV:-}" ]]; then
+  MYSQL_PASSWORD_DEV="$(gen_secret)"
+  sed -i "s|^MYSQL_PASSWORD_DEV=.*|MYSQL_PASSWORD_DEV=${MYSQL_PASSWORD_DEV}|" "${ENV_FILE}"
+fi
+if [[ "${MYSQL_PASSWORD_PROD:-}" == "change-me" || -z "${MYSQL_PASSWORD_PROD:-}" ]]; then
+  MYSQL_PASSWORD_PROD="$(gen_secret)"
+  sed -i "s|^MYSQL_PASSWORD_PROD=.*|MYSQL_PASSWORD_PROD=${MYSQL_PASSWORD_PROD}|" "${ENV_FILE}"
 fi
 if [[ "${POSTGRES_PASSWORD:-}" == "change-me" || -z "${POSTGRES_PASSWORD:-}" ]]; then
   POSTGRES_PASSWORD="$(gen_secret)"
@@ -124,6 +128,9 @@ echo "[install] Render Nginx vhosts"
 echo "[install] Start stack"
 docker compose --env-file "${ENV_FILE}" -f docker-compose.yml -f docker-compose.server.yml up -d
 
+echo "[install] Initialize MySQL databases and users"
+./scripts/init-mysql.sh "${ENV_FILE}"
+
 echo "[install] Request TLS certificates (DNS must point to this server)"
 ./scripts/first-time-certbot.sh "${ENV_FILE}"
 
@@ -131,7 +138,8 @@ echo "[install] Done."
 echo
 echo "Generated/confirmed secrets in ${ENV_FILE}:"
 echo "  MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}"
-echo "  MYSQL_PASSWORD=${MYSQL_PASSWORD}"
+echo "  MYSQL_PASSWORD_DEV=${MYSQL_PASSWORD_DEV}"
+echo "  MYSQL_PASSWORD_PROD=${MYSQL_PASSWORD_PROD}"
 echo "  POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
 echo "  N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}"
 echo "  N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}"

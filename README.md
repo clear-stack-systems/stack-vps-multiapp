@@ -49,6 +49,7 @@ The installer will:
 - clone app repo to `/srv/apps/...` (if missing)
 - render Nginx vhosts from templates (HTTP-only until certs exist)
 - bring the stack up
+- initialize MySQL dev/prod databases and users
 - request certificates with Certbot, re-render HTTPS vhosts, and reload Nginx
 
 ## Deploy
@@ -74,3 +75,4 @@ The installer will:
 ## Notes
 - `.env.*` files are not committed; only `.env.example` is tracked.
 - `nginx/sites` is generated at render time; example vhosts live as `*.conf.example`.
+- MySQL uses one container; dev/prod databases and users are created from `MYSQL_*_DEV/PROD` in `scripts/init-mysql.sh`.
