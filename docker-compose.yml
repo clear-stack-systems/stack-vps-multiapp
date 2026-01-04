@@ -52,6 +52,9 @@ services:
     networks: [stack]
 
   composer_dev:
+    build:
+      context: ./docker/composer
+      dockerfile: Dockerfile
     image: ${COMPOSER_IMAGE}
     container_name: ${APP_NAME}_composer_dev
     working_dir: /app
@@ -61,6 +64,9 @@ services:
     networks: [stack]
 
   composer_prod:
+    build:
+      context: ./docker/composer
+      dockerfile: Dockerfile
     image: ${COMPOSER_IMAGE}
     container_name: ${APP_NAME}_composer_prod
     working_dir: /app
