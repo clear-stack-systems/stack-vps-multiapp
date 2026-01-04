@@ -28,7 +28,8 @@ render_app() {
   if cert_exists "${server_name}"; then
     template="nginx/templates/app.conf.tpl"
   fi
-  SERVER_NAME="${server_name}" UPSTREAM="${upstream}" envsubst < "${template}" > "nginx/sites/${server_name}.conf"
+  SERVER_NAME="${server_name}" UPSTREAM="${upstream}" \
+    envsubst '${SERVER_NAME} ${UPSTREAM}' < "${template}" > "nginx/sites/${server_name}.conf"
 }
 
 render_n8n() {
@@ -37,7 +38,8 @@ render_n8n() {
   if cert_exists "${server_name}"; then
     template="nginx/templates/n8n.conf.tpl"
   fi
-  SERVER_NAME="${server_name}" envsubst < "${template}" > "nginx/sites/${server_name}.conf"
+  SERVER_NAME="${server_name}" \
+    envsubst '${SERVER_NAME}' < "${template}" > "nginx/sites/${server_name}.conf"
 }
 
 render_app "${DOMAIN_DEV}" "${APP_NAME}_php_dev"
