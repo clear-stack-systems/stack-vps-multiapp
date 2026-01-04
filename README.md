@@ -57,6 +57,10 @@ The installer will:
 ./scripts/deploy.sh prod
 ```
 
+## PHP + Composer images
+- PHP-FPM is built locally from `docker/php-fpm/Dockerfile` (extensions: gd, intl, zip).
+- Composer runs in a separate container (`composer:2.8.7`) for `deploy.sh`.
+
 ## Optional: n8n
 - Set `DOMAIN_N8N` to a real DNS name to enable the n8n vhost and certificate.
 - Keep `N8N_BASIC_AUTH_*` enabled for initial access; installer generates secrets if left as `change-me`.

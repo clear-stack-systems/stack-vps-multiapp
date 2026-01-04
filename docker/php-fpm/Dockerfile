@@ -1,0 +1,22 @@
+FROM php:8.5.1-fpm-alpine3.23
+
+RUN set -eux; \
+  apk add --no-cache \
+    icu-libs \
+    libzip \
+    libpng \
+    libjpeg-turbo \
+    freetype; \
+  apk add --no-cache --virtual .build-deps \
+    $PHPIZE_DEPS \
+    icu-dev \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev; \
+  docker-php-ext-configure gd --with-freetype --with-jpeg; \
+  docker-php-ext-install -j"$(nproc)" \
+    gd \
+    intl \
+    zip; \
+  apk del .build-deps

@@ -12,41 +12,25 @@ volumes:
 
 services:
   app_dev:
+    build:
+      context: ./docker/php-fpm
+      dockerfile: Dockerfile
     image: ${PHP_IMAGE}
     container_name: ${APP_NAME}_php_dev
     working_dir: /var/www/app
-    command:
-      - sh
-      - -lc
-      - >
-          if command -v php-fpm8.5 >/dev/null 2>&1; then exec php-fpm8.5 -F;
-          elif command -v php-fpm8.4 >/dev/null 2>&1; then exec php-fpm8.4 -F;
-          elif command -v php-fpm8.3 >/dev/null 2>&1; then exec php-fpm8.3 -F;
-          elif command -v php-fpm8.2 >/dev/null 2>&1; then exec php-fpm8.2 -F;
-          elif command -v php-fpm8.1 >/dev/null 2>&1; then exec php-fpm8.1 -F;
-          elif command -v php-fpm8 >/dev/null 2>&1; then exec php-fpm8 -F;
-          elif command -v php-fpm >/dev/null 2>&1; then exec php-fpm -F;
-          else echo "php-fpm binary not found in container" >&2; exit 1; fi
+    command: ["php-fpm", "-F"]
     environment:
       TZ: ${TZ}
     networks: [stack]
 
   app_prod:
+    build:
+      context: ./docker/php-fpm
+      dockerfile: Dockerfile
     image: ${PHP_IMAGE}
     container_name: ${APP_NAME}_php_prod
     working_dir: /var/www/app
-    command:
-      - sh
-      - -lc
-      - >
-          if command -v php-fpm8.5 >/dev/null 2>&1; then exec php-fpm8.5 -F;
-          elif command -v php-fpm8.4 >/dev/null 2>&1; then exec php-fpm8.4 -F;
-          elif command -v php-fpm8.3 >/dev/null 2>&1; then exec php-fpm8.3 -F;
-          elif command -v php-fpm8.2 >/dev/null 2>&1; then exec php-fpm8.2 -F;
-          elif command -v php-fpm8.1 >/dev/null 2>&1; then exec php-fpm8.1 -F;
-          elif command -v php-fpm8 >/dev/null 2>&1; then exec php-fpm8 -F;
-          elif command -v php-fpm >/dev/null 2>&1; then exec php-fpm -F;
-          else echo "php-fpm binary not found in container" >&2; exit 1; fi
+    command: ["php-fpm", "-F"]
     environment:
       TZ: ${TZ}
     networks: [stack]
@@ -65,6 +49,24 @@ services:
     working_dir: /var/www/app
     environment:
       TZ: ${TZ}
+    networks: [stack]
+
+  composer_dev:
+    image: ${COMPOSER_IMAGE}
+    container_name: ${APP_NAME}_composer_dev
+    working_dir: /app
+    entrypoint: ["composer"]
+    volumes:
+      - ${APP_PATH_DEV}:/app:delegated
+    networks: [stack]
+
+  composer_prod:
+    image: ${COMPOSER_IMAGE}
+    container_name: ${APP_NAME}_composer_prod
+    working_dir: /app
+    entrypoint: ["composer"]
+    volumes:
+      - ${APP_PATH_PROD}:/app:delegated
     networks: [stack]
 
   mysql:
