@@ -15,6 +15,12 @@
 # --- Docker ---
 docker-compose.override.yml
 
+# --- Nginx generated vhosts ---
+/nginx/sites/*.conf
+!/nginx/sites/00-acme.conf
+!/nginx/sites/app-dev.example.com.conf
+!/nginx/sites/app-prod.example.com.conf
+
 # --- Logs ---
 logs/
 *.log
