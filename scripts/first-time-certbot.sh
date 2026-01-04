@@ -35,6 +35,9 @@ if [[ -n "${DOMAIN_N8N:-}" ]]; then
   request_cert "${DOMAIN_N8N}"
 fi
 
+echo "[certbot] Render HTTPS vhosts..."
+./scripts/render-nginx.sh "${ENV_FILE}"
+
 echo "[certbot] Reloading nginx..."
 docker compose --env-file "${ENV_FILE}" -f docker-compose.yml -f docker-compose.server.yml \
   exec nginx nginx -s reload

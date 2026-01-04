@@ -47,9 +47,9 @@ The installer will:
 - configure UFW (22/80/443)
 - create required folders under `/srv`
 - clone app repo to `/srv/apps/...` (if missing)
-- render Nginx vhosts from templates
+- render Nginx vhosts from templates (HTTP-only until certs exist)
 - bring the stack up
-- request certificates with Certbot and reload Nginx
+- request certificates with Certbot, re-render HTTPS vhosts, and reload Nginx
 
 ## Deploy
 ```bash

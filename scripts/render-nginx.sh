@@ -14,15 +14,29 @@ set +a
 
 mkdir -p nginx/sites
 
+cert_exists() {
+  local server_name="$1"
+  local cert_dir="/srv/letsencrypt/conf/live/${server_name}"
+  [[ -s "${cert_dir}/fullchain.pem" && -s "${cert_dir}/privkey.pem" ]]
+}
+
 render_app() {
   local server_name="$1"
   local upstream="$2"
-  SERVER_NAME="${server_name}" UPSTREAM="${upstream}" envsubst < nginx/templates/app.conf.tpl > "nginx/sites/${server_name}.conf"
+  local template="nginx/templates/app-http.conf.tpl"
+  if cert_exists "${server_name}"; then
+    template="nginx/templates/app.conf.tpl"
+  fi
+  SERVER_NAME="${server_name}" UPSTREAM="${upstream}" envsubst < "${template}" > "nginx/sites/${server_name}.conf"
 }
 
 render_n8n() {
   local server_name="$1"
-  SERVER_NAME="${server_name}" envsubst < nginx/templates/n8n.conf.tpl > "nginx/sites/${server_name}.conf"
+  local template="nginx/templates/n8n-http.conf.tpl"
+  if cert_exists "${server_name}"; then
+    template="nginx/templates/n8n.conf.tpl"
+  fi
+  SERVER_NAME="${server_name}" envsubst < "${template}" > "nginx/sites/${server_name}.conf"
 }
 
 render_app "${DOMAIN_DEV}" "${APP_NAME}_php_dev"
