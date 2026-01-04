@@ -76,3 +76,4 @@ The installer will:
 - `.env.*` files are not committed; only `.env.example` is tracked.
 - `nginx/sites` is generated at render time; example vhosts live as `*.conf.example`.
 - MySQL uses one container; dev/prod databases and users are created from `MYSQL_*_DEV/PROD` in `scripts/init-mysql.sh`.
+- Nginx serves static assets from host-mounted app paths (`APP_PATH_DEV` -> `/var/www/app_dev`, `APP_PATH_PROD` -> `/var/www/app_prod`).

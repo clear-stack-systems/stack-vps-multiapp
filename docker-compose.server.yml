@@ -28,6 +28,8 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/sites:/etc/nginx/conf.d:ro
+      - ${APP_PATH_DEV}:/var/www/app_dev:ro
+      - ${APP_PATH_PROD}:/var/www/app_prod:ro
       - /srv/letsencrypt/www:/var/www/certbot:ro
       - /srv/letsencrypt/conf:/etc/letsencrypt:ro
     networks: [stack]

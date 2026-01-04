@@ -24,12 +24,13 @@ cert_exists() {
 render_app() {
   local server_name="$1"
   local upstream="$2"
+  local app_root="$3"
   local template="nginx/templates/app-http.conf.tpl"
   if cert_exists "${server_name}"; then
     template="nginx/templates/app.conf.tpl"
   fi
-  SERVER_NAME="${server_name}" UPSTREAM="${upstream}" \
-    envsubst '${SERVER_NAME} ${UPSTREAM}' < "${template}" > "nginx/sites/${server_name}.conf"
+  SERVER_NAME="${server_name}" UPSTREAM="${upstream}" APP_ROOT="${app_root}" \
+    envsubst '${SERVER_NAME} ${UPSTREAM} ${APP_ROOT}' < "${template}" > "nginx/sites/${server_name}.conf"
 }
 
 render_n8n() {
@@ -42,8 +43,8 @@ render_n8n() {
     envsubst '${SERVER_NAME}' < "${template}" > "nginx/sites/${server_name}.conf"
 }
 
-render_app "${DOMAIN_DEV}" "${APP_NAME}_php_dev"
-render_app "${DOMAIN_PROD}" "${APP_NAME}_php_prod"
+render_app "${DOMAIN_DEV}" "${APP_NAME}_php_dev" "/var/www/app_dev"
+render_app "${DOMAIN_PROD}" "${APP_NAME}_php_prod" "/var/www/app_prod"
 
 if [[ -n "${DOMAIN_N8N:-}" ]]; then
   render_n8n "${DOMAIN_N8N}"

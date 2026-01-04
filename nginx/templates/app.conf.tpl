@@ -19,7 +19,7 @@ server {
   ssl_certificate     /etc/letsencrypt/live/${SERVER_NAME}/fullchain.pem;
   ssl_certificate_key /etc/letsencrypt/live/${SERVER_NAME}/privkey.pem;
 
-  root /var/www/app/public;
+  root ${APP_ROOT}/public;
   index index.php;
 
   location / {
