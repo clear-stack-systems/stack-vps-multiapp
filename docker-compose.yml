@@ -15,6 +15,7 @@ services:
     image: ${PHP_IMAGE}
     container_name: ${APP_NAME}_php_dev
     working_dir: /var/www/app
+    command: ["php-fpm", "-F"]
     environment:
       TZ: ${TZ}
     networks: [stack]
@@ -23,6 +24,7 @@ services:
     image: ${PHP_IMAGE}
     container_name: ${APP_NAME}_php_prod
     working_dir: /var/www/app
+    command: ["php-fpm", "-F"]
     environment:
       TZ: ${TZ}
     networks: [stack]
