@@ -26,9 +26,14 @@ RUN install -m 0755 -d /etc/apt/keyrings && \
     apt-get install -y docker-ce-cli && \
     rm -rf /var/lib/apt/lists/*
 
-# Note: Claude CLI can be installed manually after container starts
-# The container provides all necessary tools and docker access
-# To install Claude CLI, exec into the container and follow official installation instructions
+# Install Node.js (required for Claude CLI)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Claude CLI (Claude Code)
+RUN npm install -g @anthropic-ai/claude-code && \
+    npm cache clean --force
 
 # Set working directory
 WORKDIR /workspace
