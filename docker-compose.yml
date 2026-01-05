@@ -123,3 +123,23 @@ services:
     networks: [stack]
     expose:
       - "5678"
+
+  claude_cli:
+    build:
+      context: ./docker/claude-cli
+      dockerfile: Dockerfile
+    image: ${CLAUDE_CLI_IMAGE}
+    container_name: claude_cli
+    restart: unless-stopped
+    working_dir: /workspace
+    command: ["tail", "-f", "/dev/null"]
+    environment:
+      TZ: ${TZ}
+      STACK_NETWORK: ${STACK_NETWORK}
+      COMPOSE_PROJECT_NAME: server-stack
+      DOCKER_HOST: unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      - /srv/apps:/srv/apps:rw
+      - .:/stack:ro
+    networks: [stack]

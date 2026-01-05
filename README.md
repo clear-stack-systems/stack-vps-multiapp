@@ -72,6 +72,81 @@ The installer will:
 - Keep `N8N_BASIC_AUTH_*` enabled for initial access; installer generates secrets if left as `change-me`.
 - Set `N8N_HOST`/`N8N_PROTOCOL` to match the public n8n URL (used for webhooks).
 
+## Claude CLI Container
+
+The stack includes a Claude CLI container for AI-assisted development and operations.
+
+### Initial Setup
+
+1. Set your Anthropic API key:
+   ```bash
+   docker exec -it claude_cli bash
+   export ANTHROPIC_API_KEY="your-key-here"
+   # Or add to ~/.bashrc for persistence
+   echo 'export ANTHROPIC_API_KEY="your-key"' >> ~/.bashrc
+   ```
+
+2. Verify installation:
+   ```bash
+   docker exec -it claude_cli claude --version
+   ```
+
+### Usage
+
+**Interactive Shell**:
+```bash
+docker exec -it claude_cli bash
+```
+
+**Direct Commands**:
+```bash
+docker exec -it claude_cli claude chat
+```
+
+**Using Helper Script**:
+```bash
+./scripts/claude.sh              # Open shell
+./scripts/claude.sh chat         # Start chat
+```
+
+### Capabilities
+
+The Claude CLI container can:
+- Access all app code in `/srv/apps`
+- Control other containers via docker socket
+- Exec into other containers for inspection/modification
+- Communicate with stack services via network
+- Read compose configuration in `/stack`
+
+### Common Workflows
+
+**Inspect running services**:
+```bash
+docker exec -it claude_cli bash
+docker ps
+docker logs nginx
+```
+
+**Modify app code**:
+```bash
+docker exec -it claude_cli bash
+cd /srv/apps/wwerp/dev/current
+# Use claude CLI to make changes
+```
+
+**Exec into other containers**:
+```bash
+docker exec -it claude_cli bash
+docker exec -it wwerp_php_dev bash
+```
+
+### Security Notes
+
+- The Claude CLI container has Docker socket access (`/var/run/docker.sock`), providing root-equivalent access to the host
+- Only authorized users with SSH/sudo access should use this container
+- API keys should be set per-session; do not store them in .env files
+- Changes to app code should be committed and reviewed
+
 ## Notes
 - `.env.*` files are not committed; only `.env.example` is tracked.
 - `nginx/sites` is generated at render time; example vhosts live as `*.conf.example`.
