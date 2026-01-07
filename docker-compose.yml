@@ -19,8 +19,16 @@ services:
     container_name: ${APP_NAME}_php_dev
     working_dir: /var/www/app
     command: ["php-fpm", "-F"]
+    volumes:
+      - ${APP_PATH_DEV}:/var/www/app:delegated
     environment:
       TZ: ${TZ}
+    healthcheck:
+      test: ["CMD", "sh", "-c", "test -f /var/www/app/artisan || exit 1"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
     networks: [stack]
 
   app_prod:
@@ -31,14 +39,24 @@ services:
     container_name: ${APP_NAME}_php_prod
     working_dir: /var/www/app
     command: ["php-fpm", "-F"]
+    volumes:
+      - ${APP_PATH_PROD}:/var/www/app:delegated
     environment:
       TZ: ${TZ}
+    healthcheck:
+      test: ["CMD", "sh", "-c", "test -f /var/www/app/artisan || exit 1"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
     networks: [stack]
 
   node_builder_dev:
     image: ${NODE_IMAGE}
     container_name: ${APP_NAME}_node_builder_dev
     working_dir: /var/www/app
+    volumes:
+      - ${APP_PATH_DEV}:/var/www/app:delegated
     environment:
       TZ: ${TZ}
     networks: [stack]
@@ -47,6 +65,8 @@ services:
     image: ${NODE_IMAGE}
     container_name: ${APP_NAME}_node_builder_prod
     working_dir: /var/www/app
+    volumes:
+      - ${APP_PATH_PROD}:/var/www/app:delegated
     environment:
       TZ: ${TZ}
     networks: [stack]

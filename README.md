@@ -8,6 +8,15 @@ A reproducible multi-app server stack for:
 - MySQL + Postgres
 - n8n (optional, included)
 
+## ⚠️ IMPORTANT: Using Docker Compose
+
+**ALWAYS use the helper script** for docker compose commands:
+```bash
+./scripts/dc.sh [commands]
+```
+
+See [DOCKER_USAGE.md](./DOCKER_USAGE.md) for details and common commands.
+
 ## Goals
 - Reproducible on a new server: clone → run installer → up.
 - Versioned images (no `latest`).
