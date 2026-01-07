@@ -1,4 +1,4 @@
-FROM php:8.3.2-fpm-alpine3.20
+FROM php:8.5.1-fpm-alpine3.23
 
 # System deps
 RUN set -eux; \

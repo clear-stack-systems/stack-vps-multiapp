@@ -73,7 +73,7 @@ The installer will:
 ```
 
 ## PHP + Composer images
-- PHP-FPM is built locally from `docker/php-fpm/Dockerfile` (extensions: gd, intl, pdo_mysql, zip; base PHP 8.4.16).
+- PHP-FPM is built locally from `docker/php-fpm/Dockerfile` (extensions: gd, intl, pdo_mysql, zip; base PHP 8.5.1).
 - Composer runs in a separate container built from `docker/composer/Dockerfile` (same extensions as PHP-FPM).
 
 ## Optional: n8n
