@@ -28,6 +28,7 @@ server {
 
   location ~ \.php$ {
     include fastcgi_params;
+    fastcgi_param DOCUMENT_ROOT ${FASTCGI_ROOT}/public;
     fastcgi_param SCRIPT_FILENAME ${FASTCGI_ROOT}/public$fastcgi_script_name;
     fastcgi_pass ${UPSTREAM}:9000;
   }
