@@ -17,8 +17,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Next.js production build
-# This will fail gracefully if package.json is missing
-RUN npm run build 2>/dev/null || echo "Build skipped: package.json missing or build script undefined"
+RUN npm run build
 
 # Stage 3: Runner
 FROM node:24.12-alpine3.23 AS runner
@@ -31,9 +30,9 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Copy built application
-COPY --from=builder /app/public ./public 2>/dev/null || true
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 USER nextjs
 
