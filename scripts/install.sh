@@ -106,6 +106,14 @@ if [[ "${N8N_ENCRYPTION_KEY:-}" == "change-me-32chars-min" || -z "${N8N_ENCRYPTI
   N8N_ENCRYPTION_KEY="$(gen_key32)"
   sed -i "s|^N8N_ENCRYPTION_KEY=.*|N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}|" "${ENV_FILE}"
 fi
+if [[ "${GENERATEMEDIA_DB_PASS:-}" == "change-me" || -z "${GENERATEMEDIA_DB_PASS:-}" ]]; then
+  GENERATEMEDIA_DB_PASS="$(gen_secret)"
+  sed -i "s|^GENERATEMEDIA_DB_PASS=.*|GENERATEMEDIA_DB_PASS=${GENERATEMEDIA_DB_PASS}|" "${ENV_FILE}"
+fi
+if [[ "${GENERATEMEDIA_API_KEY:-}" == "change-me" || -z "${GENERATEMEDIA_API_KEY:-}" ]]; then
+  GENERATEMEDIA_API_KEY="$(gen_key32)"
+  sed -i "s|^GENERATEMEDIA_API_KEY=.*|GENERATEMEDIA_API_KEY=${GENERATEMEDIA_API_KEY}|" "${ENV_FILE}"
+fi
 
 echo "[install] Folders under /srv"
 sudo mkdir -p /srv/apps
@@ -120,6 +128,14 @@ if [[ ! -d "${APP_PATH_DEV}/.git" ]]; then
 fi
 if [[ ! -d "${APP_PATH_PROD}/.git" ]]; then
   git clone --branch "${APP_BRANCH_PROD:-main}" "${APP_REPO_URL}" "${APP_PATH_PROD}"
+fi
+
+echo "[install] Clone generatemedia app (if configured and missing)"
+if [[ -n "${GENERATEMEDIA_APP_REPO:-}" && -n "${GENERATEMEDIA_APP_PATH:-}" ]]; then
+  mkdir -p "$(dirname "${GENERATEMEDIA_APP_PATH}")"
+  if [[ ! -d "${GENERATEMEDIA_APP_PATH}/.git" ]]; then
+    git clone "${GENERATEMEDIA_APP_REPO}" "${GENERATEMEDIA_APP_PATH}" || echo "Warning: generatemedia repo clone failed (repo may be empty)"
+  fi
 fi
 
 echo "[install] Render Nginx vhosts"
@@ -143,3 +159,5 @@ echo "  MYSQL_PASSWORD_PROD=${MYSQL_PASSWORD_PROD}"
 echo "  POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
 echo "  N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}"
 echo "  N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}"
+echo "  GENERATEMEDIA_DB_PASS=${GENERATEMEDIA_DB_PASS:-}"
+echo "  GENERATEMEDIA_API_KEY=${GENERATEMEDIA_API_KEY:-}"

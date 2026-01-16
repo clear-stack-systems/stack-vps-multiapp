@@ -9,6 +9,7 @@ volumes:
   mysql_data:
   postgres_data:
   n8n_data:
+  redis_data:
 
 services:
   app_dev:
@@ -120,8 +121,12 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_TODOMAP_DB: ${POSTGRES_TODOMAP_DB}
+      POSTGRES_TODOMAP_USER: ${POSTGRES_TODOMAP_USER}
+      POSTGRES_TODOMAP_PASSWORD: ${POSTGRES_TODOMAP_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sh:/docker-entrypoint-initdb.d/01-init-todomap.sh:ro
     networks: [stack]
 
   n8n:
@@ -162,4 +167,56 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:rw
       - /srv/apps:/srv/apps:rw
       - .:/stack:ro
+    networks: [stack]
+
+  redis:
+    image: ${REDIS_IMAGE}
+    container_name: redis
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ}
+    volumes:
+      - redis_data:/data
+    networks: [stack]
+    command: redis-server --appendonly yes
+
+  generatemedia_web:
+    build:
+      context: ${GENERATEMEDIA_APP_PATH}
+      dockerfile: /srv/docker/stack-vps-multiapp/docker/nextjs/Dockerfile
+    image: ${GENERATEMEDIA_IMAGE}
+    container_name: generatemedia_web
+    restart: unless-stopped
+    working_dir: /app
+    environment:
+      TZ: ${TZ}
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${GENERATEMEDIA_DB_USER}:${GENERATEMEDIA_DB_PASS}@postgres:5432/${GENERATEMEDIA_DB_NAME}
+      REDIS_URL: ${GENERATEMEDIA_REDIS_URL}
+      GENERATEMEDIA_PUBLIC_BASE_URL: ${GENERATEMEDIA_PUBLIC_BASE_URL}
+      GENERATEMEDIA_API_KEY: ${GENERATEMEDIA_API_KEY}
+    depends_on:
+      - postgres
+      - redis
+    expose:
+      - "3000"
+    networks: [stack]
+
+  generatemedia_worker:
+    image: ${GENERATEMEDIA_IMAGE}
+    container_name: generatemedia_worker
+    restart: unless-stopped
+    working_dir: /app
+    command: ["npm", "run", "worker"]
+    environment:
+      TZ: ${TZ}
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${GENERATEMEDIA_DB_USER}:${GENERATEMEDIA_DB_PASS}@postgres:5432/${GENERATEMEDIA_DB_NAME}
+      REDIS_URL: ${GENERATEMEDIA_REDIS_URL}
+      GENERATEMEDIA_PUBLIC_BASE_URL: ${GENERATEMEDIA_PUBLIC_BASE_URL}
+      GENERATEMEDIA_API_KEY: ${GENERATEMEDIA_API_KEY}
+    depends_on:
+      - postgres
+      - redis
+      - generatemedia_web
     networks: [stack]

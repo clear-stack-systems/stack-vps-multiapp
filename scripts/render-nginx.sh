@@ -44,11 +44,26 @@ render_n8n() {
     envsubst '${SERVER_NAME}' < "${template}" > "nginx/sites/${server_name}.conf"
 }
 
+render_nextjs() {
+  local server_name="$1"
+  local upstream="$2"
+  local template="nginx/templates/nextjs-http.conf.tpl"
+  if cert_exists "${server_name}"; then
+    template="nginx/templates/nextjs.conf.tpl"
+  fi
+  SERVER_NAME="${server_name}" UPSTREAM="${upstream}" \
+    envsubst '${SERVER_NAME} ${UPSTREAM}' < "${template}" > "nginx/sites/${server_name}.conf"
+}
+
 render_app "${DOMAIN_DEV}" "${APP_NAME}_php_dev" "/var/www/app_dev" "/var/www/app"
 render_app "${DOMAIN_PROD}" "${APP_NAME}_php_prod" "/var/www/app_prod" "/var/www/app"
 
 if [[ -n "${DOMAIN_N8N:-}" ]]; then
   render_n8n "${DOMAIN_N8N}"
+fi
+
+if [[ -n "${DOMAIN_GENERATEMEDIA:-}" ]]; then
+  render_nextjs "${DOMAIN_GENERATEMEDIA}" "generatemedia_web"
 fi
 
 echo "[render-nginx] Rendered vhosts into nginx/sites/"

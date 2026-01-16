@@ -22,6 +22,7 @@ services:
       - app_dev
       - app_prod
       - n8n
+      - generatemedia_web
     ports:
       - "80:80"
       - "443:443"
