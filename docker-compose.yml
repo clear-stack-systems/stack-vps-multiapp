@@ -188,6 +188,8 @@ services:
     container_name: generatemedia_web
     restart: unless-stopped
     working_dir: /app
+    env_file:
+      - ${GENERATEMEDIA_APP_PATH}/.env
     environment:
       TZ: ${TZ}
       NODE_ENV: production
@@ -208,6 +210,8 @@ services:
     restart: unless-stopped
     working_dir: /app
     command: ["npm", "run", "worker"]
+    env_file:
+      - ${GENERATEMEDIA_APP_PATH}/.env
     environment:
       TZ: ${TZ}
       NODE_ENV: production

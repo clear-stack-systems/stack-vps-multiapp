@@ -33,6 +33,21 @@ if [[ ! -f "${GENERATEMEDIA_APP_PATH}/package.json" ]]; then
   echo "[deploy:generatemedia] The repo may be empty. Build will fail gracefully."
 fi
 
+echo "[deploy:generatemedia] Checking app environment file..."
+if [[ ! -f "${GENERATEMEDIA_APP_PATH}/.env" ]]; then
+  echo "[deploy:generatemedia] Warning: No .env file found at ${GENERATEMEDIA_APP_PATH}/.env"
+  echo "[deploy:generatemedia] Please create one from .env.example:"
+  echo "  cp ${GENERATEMEDIA_APP_PATH}/.env.example ${GENERATEMEDIA_APP_PATH}/.env"
+  echo "  nano ${GENERATEMEDIA_APP_PATH}/.env"
+  echo "[deploy:generatemedia] Required: KIE_API_KEY, KIE_DEFAULT_MODEL"
+  echo ""
+  read -p "Continue anyway? (y/N) " -n 1 -r
+  echo
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    exit 1
+  fi
+fi
+
 echo "[deploy:generatemedia] Building generatemedia image..."
 docker compose --env-file "${ENV_FILE}" -f docker-compose.yml -f docker-compose.server.yml build generatemedia_web
 
