@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  generatemedia_web:
+    image: node:20-slim
+    command: sh -c "cd /app && apt-get update -qq && apt-get install -y -qq openssl && npm install && npx prisma generate && npm run dev"
+    working_dir: /app
+    volumes:
+      - ${GENERATEMEDIA_APP_PATH}:/app:cached
+      - /srv/apps/generatemedia/uploads:/app/uploads:rw
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+    restart: unless-stopped
+
+  generatemedia_worker:
+    image: node:20-slim
+    command: sh -c "cd /app && apt-get update -qq && apt-get install -y -qq openssl && npm install && npx prisma generate && npm run worker"
+    working_dir: /app
+    volumes:
+      - ${GENERATEMEDIA_APP_PATH}:/app:cached
+      - /srv/apps/generatemedia/uploads:/app/uploads:rw
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped

@@ -197,6 +197,8 @@ services:
       REDIS_URL: ${GENERATEMEDIA_REDIS_URL}
       GENERATEMEDIA_PUBLIC_BASE_URL: ${GENERATEMEDIA_PUBLIC_BASE_URL}
       GENERATEMEDIA_API_KEY: ${GENERATEMEDIA_API_KEY}
+    volumes:
+      - /srv/apps/generatemedia/uploads:/app/uploads:rw
     depends_on:
       - postgres
       - redis
@@ -219,6 +221,8 @@ services:
       REDIS_URL: ${GENERATEMEDIA_REDIS_URL}
       GENERATEMEDIA_PUBLIC_BASE_URL: ${GENERATEMEDIA_PUBLIC_BASE_URL}
       GENERATEMEDIA_API_KEY: ${GENERATEMEDIA_API_KEY}
+    volumes:
+      - /srv/apps/generatemedia/uploads:/app/uploads:rw
     depends_on:
       - postgres
       - redis
