@@ -19,6 +19,9 @@ COPY . .
 # Next.js production build
 RUN npm run build
 
+# Ensure public directory exists (even if empty)
+RUN mkdir -p /app/public
+
 # Stage 3: Runner
 FROM node:24.12-alpine3.23 AS runner
 WORKDIR /app
