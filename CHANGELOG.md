@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Generatemedia File Uploads** - Increase nginx upload limit to 10MB
+  - Added `client_max_body_size 10M;` to generatemedia nginx vhost
+  - Previously limited to 1MB (nginx default) despite app supporting 10MB
+  - Aligns nginx configuration with application upload limits
+
 ### Planned
 - Automated backup script for databases
 - Health check dashboard

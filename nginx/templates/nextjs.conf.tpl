@@ -19,6 +19,9 @@ server {
   ssl_certificate     /etc/letsencrypt/live/${SERVER_NAME}/fullchain.pem;
   ssl_certificate_key /etc/letsencrypt/live/${SERVER_NAME}/privkey.pem;
 
+  # Allow file uploads up to 10MB
+  client_max_body_size 10M;
+
   location / {
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
