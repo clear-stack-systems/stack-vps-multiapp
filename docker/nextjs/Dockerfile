@@ -1,8 +1,8 @@
 # Multi-stage build for Next.js production runtime
-# Based on node:24.12-alpine3.23 to match stack NODE_IMAGE
+# Using Alpine 3.19 for OpenSSL 1.1 compatibility with Prisma
 
 # Stage 1: Dependencies
-FROM node:24.12-alpine3.23 AS deps
+FROM node:24.12-alpine3.19 AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
@@ -11,7 +11,7 @@ COPY package*.json ./
 RUN npm ci --production=false
 
 # Stage 2: Builder
-FROM node:24.12-alpine3.23 AS builder
+FROM node:24.12-alpine3.19 AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -23,7 +23,7 @@ RUN npm run build
 RUN mkdir -p /app/public
 
 # Stage 3: Runner
-FROM node:24.12-alpine3.23 AS runner
+FROM node:24.12-alpine3.19 AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
