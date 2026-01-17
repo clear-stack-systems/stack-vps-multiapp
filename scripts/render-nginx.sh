@@ -17,8 +17,9 @@ find nginx/sites -maxdepth 1 -type f -name "*.conf" ! -name "00-acme.conf" -dele
 
 cert_exists() {
   local server_name="$1"
-  local cert_dir="/srv/letsencrypt/conf/live/${server_name}"
-  [[ -s "${cert_dir}/fullchain.pem" && -s "${cert_dir}/privkey.pem" ]]
+  # Check certificate existence from nginx container (has access to /etc/letsencrypt)
+  docker exec nginx test -s "/etc/letsencrypt/live/${server_name}/fullchain.pem" \
+    && docker exec nginx test -s "/etc/letsencrypt/live/${server_name}/privkey.pem" 2>/dev/null
 }
 
 render_app() {
