@@ -1,9 +1,8 @@
 # Multi-stage build for Next.js production runtime
-# Using Node 20 Alpine for OpenSSL 1.1 compatibility with Prisma
+# Using Debian-based Node for full Prisma compatibility
 
 # Stage 1: Dependencies
-FROM node:20-alpine AS deps
-RUN apk add --no-cache libc6-compat
+FROM node:20-slim AS deps
 WORKDIR /app
 
 # Copy package files
@@ -11,7 +10,7 @@ COPY package*.json ./
 RUN npm ci --production=false
 
 # Stage 2: Builder
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -23,7 +22,7 @@ RUN npm run build
 RUN mkdir -p /app/public
 
 # Stage 3: Runner
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
