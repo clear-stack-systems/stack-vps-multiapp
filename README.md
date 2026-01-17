@@ -490,3 +490,162 @@ docker compose up -d generatemedia_web generatemedia_worker
 # Stop everything
 ./scripts/dc.sh down
 ```
+
+---
+
+## Lessons Learned
+
+### Adding New Applications to the Stack
+
+Important insights from integrating Next.js + Prisma applications:
+
+#### 1. Next.js Docker Image Requirements
+
+**Always create the `public` directory:**
+```dockerfile
+# Even if empty, Next.js requires this directory
+RUN mkdir -p /app/public
+```
+Without this, Next.js build fails in production.
+
+**For workers (tsx/ts-node), copy source files:**
+```dockerfile
+# Workers using tsx need source files and node_modules
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/node_modules ./node_modules
+```
+
+#### 2. Prisma ORM Requirements
+
+**Use Debian-based Node image, not Alpine:**
+```dockerfile
+# ✅ Correct: Debian-based
+FROM node:20-slim
+
+# ❌ Wrong: Alpine (Prisma needs glibc)
+FROM node:20-alpine
+```
+Prisma requires glibc (GNU C Library), which Alpine doesn't have (uses musl).
+
+**Install OpenSSL in runtime image:**
+```dockerfile
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+```
+Prisma requires libssl at runtime.
+
+**Copy Prisma schema for migrations:**
+```dockerfile
+COPY --from=builder /app/prisma ./prisma
+```
+Needed to run `npx prisma migrate deploy` in production.
+
+#### 3. Environment Variable Strategy
+
+**Separate stack and app environments:**
+
+- **Stack `.env.dev`**: Infrastructure (DB URLs, domains, paths)
+  - Safe to have `.env.example` in git
+  - Contains auto-generated secrets (DB passwords)
+
+- **App `.env`**: Application-specific (API keys)
+  - Loaded via `env_file` in docker-compose
+  - Never committed to any repo
+  - Each app manages its own secrets
+
+**Why separate:**
+- Stack can be cloned without exposing app secrets
+- App secrets stay in app repo (or separate secure storage)
+- Infrastructure variables are documented in stack `.env.example`
+
+#### 4. Nginx Certificate Detection
+
+**Check certificates from inside the nginx container:**
+```bash
+# ✅ Correct
+docker exec nginx test -f /etc/letsencrypt/live/${DOMAIN}/fullchain.pem
+
+# ❌ Wrong
+test -f /srv/letsencrypt/conf/live/${DOMAIN}/fullchain.pem
+```
+Host filesystem paths may differ from container view.
+
+#### 5. BullMQ Workers
+
+**Run as separate container with same image:**
+```yaml
+myapp_worker:
+  image: ${MYAPP_IMAGE}  # Same as web
+  command: ["npm", "run", "worker"]  # Different command
+```
+
+**Worker needs:**
+- Redis connection
+- Database access
+- Same environment variables as web
+- Dependency on web service (for startup order)
+
+#### 6. Docker Compose Helper Script
+
+**ALWAYS use `./scripts/dc.sh` instead of `docker compose`:**
+```bash
+# ✅ Correct
+./scripts/dc.sh up -d
+
+# ❌ Wrong (recreates containers without volumes)
+docker compose up -d
+```
+
+The helper script ensures correct env files and compose files are loaded.
+
+#### 7. Multi-Stage Docker Builds
+
+**Pattern for Next.js:**
+1. **deps** - Install dependencies
+2. **builder** - Build application
+3. **runner** - Minimal runtime image
+
+**Benefits:**
+- Smaller final image
+- Cached dependency layer
+- Separates build-time and runtime dependencies
+
+#### 8. Health Checks
+
+**Add health checks for critical services:**
+```yaml
+services:
+  myapp_web:
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+```
+
+Helps Docker Compose detect when services are ready.
+
+### Common Pitfalls to Avoid
+
+1. **Using `latest` tags** - Always pin versions
+2. **Hardcoding domains** - Use environment variables
+3. **Committing secrets** - Use `.env` files (gitignored)
+4. **Skipping health checks** - Prevents cascade failures
+5. **Running docker compose directly** - Use `./scripts/dc.sh`
+6. **Alpine for Prisma apps** - Use Debian instead
+7. **Missing public directory** - Next.js requires it
+8. **Forgetting OpenSSL** - Prisma needs it at runtime
+
+### Best Practices
+
+1. **Version everything** - Images, packages, dependencies
+2. **Document everything** - README, CHANGELOG, AGENTS.md
+3. **Test before commit** - `./scripts/dc.sh config`
+4. **Use templates** - Nginx vhosts, Dockerfiles
+5. **Separate concerns** - Infrastructure vs application
+6. **Fail fast** - `set -euo pipefail` in all scripts
+7. **Be idempotent** - Scripts safe to re-run
+8. **Ask before push** - Always get user approval
+
+---
+
+For detailed guidelines on working with this stack, see [AGENTS.md](./AGENTS.md).
